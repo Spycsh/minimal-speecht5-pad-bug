@@ -2,6 +2,7 @@ from transformers import SpeechT5Processor, SpeechT5ForTextToSpeech, SpeechT5Hif
 import torch
 import soundfile as sf
 
+
 model = SpeechT5ForTextToSpeech.from_pretrained(f"microsoft/speecht5_tts")
 processor = SpeechT5Processor.from_pretrained(f"microsoft/speecht5_tts")
 vocoder = SpeechT5HifiGan.from_pretrained(f"microsoft/speecht5_hifigan")
@@ -14,10 +15,9 @@ def text2speech(text, output_audio_path):
     # inputs = processor(text=text, padding='max_length', max_length=128, return_tensors="pt")
 
     with torch.no_grad():
-        spectrogram = model.generate_speech(inputs["input_ids"], speaker_embedding)
-        speech = vocoder(spectrogram)
+        speech = model.generate_speech(inputs["input_ids"], speaker_embedding, vocoder=vocoder)
     sf.write(output_audio_path, speech.cpu().numpy(), samplerate=16000)
 
 if __name__ == "__main__":
-    text = "I have a dream."
+    text = "I have a dream, do you."
     text2speech(text, "output.wav")
